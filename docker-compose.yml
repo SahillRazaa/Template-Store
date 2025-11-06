@@ -5,8 +5,10 @@ services:
     container_name: saas-store-db
     ports:
       - "5432:5432"
-    env_file:
-      - ./server/.env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
