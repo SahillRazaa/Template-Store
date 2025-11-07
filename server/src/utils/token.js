@@ -9,12 +9,14 @@ const sendTokenCookie = (res, userId) => {
         expiresIn: '1d'
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.cookie('token', token, {
-    httpOnly: true, 
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: 'strict', 
-    maxAge: 24 * 60 * 60 * 1000, 
-  });
+        httpOnly: true, 
+        secure: isProduction,
+        sameSite: isProduction ? 'None' : 'Lax',         
+        maxAge: 24 * 60 * 60 * 1000, 
+    });
 }
 
 module.exports = {
