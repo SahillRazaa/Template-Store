@@ -1,4 +1,3 @@
-// server/migrations/...-enable-uuid-extension.js
 'use strict';
 
 module.exports = {

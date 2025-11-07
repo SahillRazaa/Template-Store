@@ -1,4 +1,4 @@
-const { Template } = require('../../models');
+const { Templates } = require('../../models');
 const { Op } = require('sequelize'); 
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -18,7 +18,7 @@ const getAllTemplates = asyncHandler(async (req, res, next) => {
     ];
   }
 
-  const templates = await Template.findAll({
+  const templates = await Templates.findAll({
     where,
     order: [['createdAt', 'DESC']] 
   });
@@ -34,7 +34,7 @@ const getAllTemplates = asyncHandler(async (req, res, next) => {
 const getTemplateById = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
-  const template = await Template.findByPk(id); 
+  const template = await Templates.findByPk(id); 
 
   if (!template) {
     return res.status(404).json({ success: false, message: 'Template not found' });

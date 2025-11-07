@@ -1,110 +1,109 @@
-const { User } = require('../../models/user');
-const { hashPassword } = require('../services/password');
-const { sendTokenCookie } = require('../utils/token');
+const { Users } = require("../../models");
+const { hashPassword, decryptPassword } = require("../services/password");
+const asyncHandler = require("../utils/asyncHandler");
+const { sendTokenCookie } = require("../utils/token");
 
-const registerUser = async (req, res, next) => {
-    const { name, email, password, confirmPassword } = req.body;
-    try {
-        if(!name || !email || !password || !confirmPassword) {
-            res.status(400).json({success: false, message: "Please provide all details!"});
-        }
+const registerUser = asyncHandler(async (req, res) => {
+  const { name, email, password, confirmPassword } = req.body;
 
-        if(password !== confirmPassword) {
-            res.status(400).json({success: false, message: "Passwords does not match!"});
-        }
+  if (!name || !email || !password || !confirmPassword) {
+    return res.status(400).json({ success: false, message: "Please provide all details!" });
+  }
 
-        if(password.length < 8) {
-            res.status(400).json({success: false, message: "Passwords must be atleast 8 characters!"});
-        }
+  if (password !== confirmPassword) {
+    return res.status(400).json({ success: false, message: "Passwords do not match!" });
+  }
 
-        const userExits = await User.findOne({
-            where: {
-                email
-            }
-        });
+  if (password.length < 8) {
+    return res.status(400).json({ success: false, message: "Password must be at least 8 characters!" });
+  }
 
-        if(userExits) {
-            return res.status(409).json({ success: false, message: 'User already exists' });
-        }
+  const userExists = await Users.findOne({ where: { email } });
 
-        const hashedPassword = await hashPassword(password);
+  if (userExists) {
+    return res.status(409).json({ success: false, message: "User already exists!" });
+  }
 
-        const newUser = await User.create({
-            name,
-            email,
-            password: hashedPassword
-        })
+  const hashedPassword = await hashPassword(password);
 
-        sendTokenCookie(res, newUser.id);
+  const newUser = await Users.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
 
-        res.status(201).json({
-            success: false,
-            message: 'User registered successfully',
-            user: {
-                id: newUser.id,
-                name: newUser.name,
-                email: newUser.email,
-            },
-        })
+  sendTokenCookie(res, newUser.id);
 
-    } 
-    catch(error) {
-        console.error('Error in user registration:', error);
-        next(error);
-    }
-}
+  return res.status(201).json({
+    success: true,
+    message: "User registered successfully",
+    user: {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+    },
+  });
+});
 
-const loginUser = async (req, res, next) => {
-    const { email, password } = req.body;
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    try {
-        if (!email || !password) {
-            return res.status(400).json({ success: false, message: "Please provide email and password" });
-        }
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: "Please provide email and password!" });
+  }
 
-        if(password.length < 8) {
-            res.status(400).json({success: false, message: "Passwords must be atleast 8 characters!"});
-        }
+  if (password.length < 8) {
+    return res.status(400).json({ success: false, message: "Password must be at least 8 characters!" });
+  }
 
-        const user = await User.scope('withPassword').findOne({ where: { email } });
+  const user = await Users.scope("withPassword").findOne({ where: { email } });
 
-        if (!user) {
-            return res.status(401).json({ success: false, message: "Invalid credentials" });
-        }
+  if (!user) {
+    return res.status(401).json({ success: false, message: "Invalid credentials!" });
+  }
 
-        const isMatch = await comparePassword(password, user.password);
+  const isMatch = await decryptPassword(password, user.password);
 
-        if (!isMatch) {
-            return res.status(401).json({ success: false, message: "Invalid credentials" });
-        }
+  if (!isMatch) {
+    return res.status(401).json({ success: false, message: "Invalid credentials!" });
+  }
 
-        sendTokenCookie(res, user.id);
+  sendTokenCookie(res, user.id);
 
-        res.status(200).json({
-            success: true,
-            message: 'Logged in successfully',
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-            },
-        });
-    } catch (error) {
-        console.error('Error in user login:', error);
-        next(error);
-    }
-};
+  return res.status(200).json({
+    success: true,
+    message: "Logged in successfully",
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  });
+});
 
-const logoutUser = (req, res, next) => {
-    res.cookie('token', '', {
-        httpOnly: true,
-        expires: new Date(0),
-    });
-    res.status(200).json({ success: true, message: 'Logged out successfully' });
-};
+const logoutUser = asyncHandler(async (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+
+  return res.status(200).json({ success: true, message: "Logged out successfully" });
+});
+
+const getMe = asyncHandler(async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    user: {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+    },
+  });
+});
 
 module.exports = {
-    registerUser,
-    loginUser,
-    logoutUser
-}
+  registerUser,
+  loginUser,
+  logoutUser,
+  getMe,
+};

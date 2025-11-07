@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../../models');
+const { Users } = require('../../models');
 const asyncHandler = require('../utils/asyncHandler');
 
 const protect = asyncHandler(async (req, res, next) => {
@@ -9,7 +9,7 @@ const protect = asyncHandler(async (req, res, next) => {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findByPk(decoded.id);
+    req.user = await Users.findByPk(decoded.id);
     if (!req.user) {
         return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
     }

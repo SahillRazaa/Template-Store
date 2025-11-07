@@ -20,20 +20,29 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-const limiter = rateLimit({
+const defaultLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests from this IP, please try again after 15 minutes'
 });
-app.use(limiter);
 
-app.get('/api/health', (_, res) => {
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20, 
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many authentication attempts, please try again after 15 minutes'
+});
+
+app.get('/api/health', defaultLimiter, (_, res) => {
   res.status(200).json({ status: 'ok', message: "Template Store API is running...." });
 });
 
-app.use('/api', mainRouter);
+app.use('/api/auth', authLimiter);
+
+app.use('/api', defaultLimiter, mainRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Resource not found" });

@@ -1,16 +1,16 @@
-const { User, Template, Favorite } = require('../../models');
+const { Users, Templates, Favorites } = require('../../models');
 const asyncHandler =require('../utils/asyncHandler');
 
 const addFavorite = asyncHandler(async (req, res, next) => {
   const { templateId } = req.params;
   const userId = req.user.id; 
 
-  const template = await Template.findByPk(templateId);
+  const template = await Templates.findByPk(templateId);
   if (!template) {
     return res.status(404).json({ success: false, message: 'Template not found' });
   }
 
-  const existingFavorite = await Favorite.findOne({
+  const existingFavorite = await Favorites.findOne({
     where: {
       userId,
       templateId,
@@ -21,7 +21,7 @@ const addFavorite = asyncHandler(async (req, res, next) => {
     return res.status(409).json({ success: false, message: 'Template already in favorites' });
   }
 
-  await Favorite.create({
+  await Favorites.create({
     userId,
     templateId,
   });
@@ -33,9 +33,9 @@ const addFavorite = asyncHandler(async (req, res, next) => {
 const getFavorites = asyncHandler(async (req, res, next) => {
   const userId = req.user.id;
 
-  const user = await User.findByPk(userId, {
+  const user = await Users.findByPk(userId, {
     include: {
-      model: Template,
+      model: Templates,
       as: 'favoritedTemplates',
       through: {
         attributes: [],
@@ -54,7 +54,28 @@ const getFavorites = asyncHandler(async (req, res, next) => {
   });
 });
 
+const removeFavorite = asyncHandler(async (req, res, next) => {
+  const { templateId } = req.params;
+  const userId = req.user.id;
+
+  const favorite = await Favorites.findOne({
+    where: {
+      userId,
+      templateId,
+    },
+  });
+
+  if (!favorite) {
+    return res.status(404).json({ success: false, message: 'Favorite entry not found' });
+  }
+
+  await favorite.destroy();
+
+  res.status(200).json({ success: true, message: 'Template removed from favorites' });
+});
+
 module.exports = {
   addFavorite,
   getFavorites,
+  removeFavorite
 };

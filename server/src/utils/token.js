@@ -17,6 +17,6 @@ const sendTokenCookie = (res, userId) => {
   });
 }
 
-module.export = {
+module.exports = {
     sendTokenCookie
 }

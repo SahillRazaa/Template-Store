@@ -6,8 +6,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      User.belongsToMany(models.Template, {
-        through: models.Favorite, 
+      User.belongsToMany(models.Templates, {
+        through: models.Favorites, 
         foreignKey: 'userId',
         as: 'favoritedTemplates'
       });
@@ -38,13 +38,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'User',
+    modelName: 'Users',
     scopes: {
       defaultScope: {
         attributes: { exclude: ['password'] }, 
       },
       withPassword: {
-        attributes: { include: ['password'] }, 
+        attributes: { include: ['password'] },
       },
     }
   });

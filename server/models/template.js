@@ -5,8 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Template extends Model {
     static associate(models) {
-      Template.belongsToMany(models.User, {
-        through: models.Favorite, 
+      Template.belongsToMany(models.Users, {
+        through: models.Favorites, 
         foreignKey: 'templateId',
         as: 'favoritedBy'
       });
@@ -23,9 +23,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    description: {
+    short_description: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
+    },
+    long_description: {
+      type: DataTypes.TEXT,
+      allowNull: true
     },
     thumbnail_url: {
       type: DataTypes.STRING,
@@ -37,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'Template',
+    modelName: 'Templates',
   });
   return Template;
 };

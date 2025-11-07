@@ -5,11 +5,11 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Favorite extends Model {
     static associate(models) {
-      Favorite.belongsTo(models.User, {
+      Favorite.belongsTo(models.Users, {
         foreignKey: 'userId',
         as: 'user'
       });
-      Favorite.belongsTo(models.Template, {
+      Favorite.belongsTo(models.Templates, {
         foreignKey: 'templateId',
         as: 'template'
       });
@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     sequelize,
-    modelName: 'Favorite',
+    modelName: 'Favorites',
   });
   return Favorite;
 };

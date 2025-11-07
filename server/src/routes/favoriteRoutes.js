@@ -1,5 +1,5 @@
 const express = require('express');
-const { addFavorite, getFavorites } = require('../controllers/favoriteController');
+const { addFavorite, getFavorites, removeFavorite } = require('../controllers/favoriteController');
 const { protect } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -10,6 +10,7 @@ router.route('/')
   .get(getFavorites);
 
 router.route('/:templateId')
-  .post(addFavorite);
+  .post(addFavorite)
+  .delete(removeFavorite);
 
 module.exports = router;
