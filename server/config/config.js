@@ -1,4 +1,5 @@
-require("dotenv").config({ path: "../.env" });
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
 module.exports = {
   development: {
@@ -13,24 +14,9 @@ module.exports = {
       ssl: false,
     },
   },
-  test: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME_TEST || "test_database",
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: "postgres",
-    logging: false,
-    dialectOptions: {
-      ssl: false,
-    },
-  },
+  
   production: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    use_env_variable: "DATABASE_URL", 
     dialect: "postgres",
     logging: false,
     dialectOptions: {
