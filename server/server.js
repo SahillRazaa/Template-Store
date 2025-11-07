@@ -4,6 +4,7 @@ require("dotenv").config();
 const app = require("./src/app");
 const { sequelize } = require("./models");
 
+console.log(process.env);
 const PORT = process.env.PORT || 8000;
 
 let server;
@@ -11,10 +12,14 @@ let server;
 async function startServer() {
   try {
     await sequelize.authenticate();
-    console.log('Database connection established successfully:', {
-      database: process.env.DB_NAME,
-      host: process.env.DB_HOST
-    });
+    if (process.env.NODE_ENV === "production") {
+      console.log('Production database (Render) connection established successfully.');
+    } else {
+      console.log('Local database (Docker) connection established successfully:', { 
+        database: sequelize.config.database,
+        host: sequelize.config.host 
+      });
+    }
 
     if (process.env.NODE_ENV === "development") {
       await sequelize.sync({ force: false });
